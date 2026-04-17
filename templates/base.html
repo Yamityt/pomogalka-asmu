@@ -32,16 +32,17 @@
     
     <script>
         // ГЛОБАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ СОКЕТА
-        // window.location.origin автоматически подставит IP твоего компа или localhost
-        const socket = io(window.location.origin, {
-            transports: ['websocket', 'polling'],
-            upgrade: true,
-            reconnection: true
+        const socket = io({
+            transports: ['websocket'], // ТУТ: только быстрые вебсокеты!
+            upgrade: false,
+            reconnection: true,
+            reconnectionAttempts: 10
         });
         
         socket.on('connect', () => {
-            // Сообщаем серверу наш ID, чтобы он мог нас "кикнуть" лично
-            socket.emit('register_user', { user_id: "{{ current_user.id if current_user else '' }}" });
+            console.log("CONNECTED TO WEBSOCKET");
+            // Регистрируем пользователя для мгновенных уведомлений
+            socket.emit('register_user', { user_id: "{{ current_user.id }}" });
         });
 
         socket.on('force_disconnect', (data) => {
