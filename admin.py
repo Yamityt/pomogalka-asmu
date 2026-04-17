@@ -77,6 +77,17 @@ def unban_user(user_id):
     # Возвращаемся обратно в админку
     return redirect(url_for('admin.dashboard'))
 
+@admin_bp.route('/clear_chat/<room_id>')
+@admin_required
+def clear_chat(room_id):
+    from models import db, Message
+    # Находим все сообщения этой комнаты и удаляем их
+    Message.query.filter_by(room_id=room_id).delete()
+    db.session.commit()
+    
+    # Возвращаемся в мониторинг чатов
+    return redirect(url_for('admin.view_all_chats'))
+
 @admin_bp.route('/chats')
 @admin_required
 def view_all_chats():
