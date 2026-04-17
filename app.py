@@ -186,6 +186,10 @@ def add_question():
     
     subject = request.form.get('subject')
     text = request.form.get('text')
+    if not text or len(text) > 500:
+        # Если текста нет или он слишком длинный (больше 500 символов)
+        # Мы просто не даем создать заявку
+        return "ОШИБКА: Текст должен быть от 1 до 500 символов", 400
     is_urgent = request.form.get('urgent') == 'on' # Проверяем галочку
     
     points = 100 if is_urgent else 50 # Если срочно - даем 100 баллов
