@@ -319,13 +319,13 @@ def handle_msg(data):
     db.session.add(new_m)
     db.session.commit()
     
-    # Отправляем ВСЕМ КРОМЕ отправителя (потому что он уже добавил его у себя через JS)
+    # Отправляем ВСЕМ (включая себя) — убрали include_self=False
     emit('receive_msg', {
         'text': text, 
         'user': user.fullname, 
         'time': datetime.now().strftime('%H:%M'),
         'room_id': room 
-    }, room=room, include_self=False)
+    }, room=room)
     
 from admin import admin_bp
 app.register_blueprint(admin_bp)
