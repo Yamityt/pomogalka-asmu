@@ -295,17 +295,25 @@ def register_user(data):
     if data.get('user_id'):
         join_room(f"user_{data['user_id']}")
 
-# --- SOCKET.IO ---
-@socketio.on('join')
-def on_join(data):
-    join_room(data['room'])
-
 @socketio.on('send_msg')
 def handle_msg(data):
+    # Проверяем, залогинен ли пользователь вообще
+    if 'user_id' not in session:
+        return False 
+        
     user = get_current_user()
-    if not user: return
-    
-    new_m = Message(room_id=data['room'], text=data['text'], author_name=user.fullname)
+    if not user or user.is_banned:
+        return False
+
+    room = data['room']
+    # БЕЗОПАСНОСТЬ: Если это личный чат (начинается с chat_), 
+    # проверяем, принадлежит ли он этому пользователю
+    if room.startswith('chat_'):
+        if str(user.id) not in room:
+            return False # Чужой не может писать в личку!
+
+    # Если всё ок — отправляем
+    new_m = Message(room_id=room, text=data['text'], author_name=user.fullname)
     db.session.add(new_m)
     db.session.commit()
     
@@ -313,8 +321,8 @@ def handle_msg(data):
         'text': data['text'], 
         'user': user.fullname, 
         'time': datetime.now().strftime('%H:%M'),
-        'room_id': data['room'] 
-    }, room=data['room'])
+        'room_id': room 
+    }, room=room)
     
 from admin import admin_bp
 app.register_blueprint(admin_bp)
