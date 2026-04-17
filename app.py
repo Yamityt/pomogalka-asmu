@@ -308,36 +308,24 @@ def register_user(data):
 
 @socketio.on('send_msg')
 def handle_msg(data):
-    if 'user_id' not in session: return False 
-
-    text = data.get('text', '').strip()
-
-    if not text or len(text) > 400:
-        return False # Слишком длинное или пустое сообщение не пройдет
-        
+    if 'user_id' not in session: return
     user = get_current_user()
-    if not user or user.is_banned:
-        return False
-
+    
     room = data['room']
-    # БЕЗОПАСНОСТЬ: Если это личный чат (начинается с chat_), 
-    # проверяем, принадлежит ли он этому пользователю
-    if room.startswith('chat_'):
-        room_parts = room.split('_')
-        if str(user.id) not in room_parts:
-            return False 
-
-    # Если всё ок — отправляем
-    new_m = Message(room_id=room, text=data['text'], author_name=user.fullname)
+    text = data['text']
+    
+    # Сохраняем в базу
+    new_m = Message(room_id=room, text=text, author_name=user.fullname)
     db.session.add(new_m)
     db.session.commit()
     
+    # Отправляем ВСЕМ КРОМЕ отправителя (потому что он уже добавил его у себя через JS)
     emit('receive_msg', {
-        'text': data['text'], 
+        'text': text, 
         'user': user.fullname, 
         'time': datetime.now().strftime('%H:%M'),
         'room_id': room 
-    }, room=room)
+    }, room=room, include_self=False)
     
 from admin import admin_bp
 app.register_blueprint(admin_bp)
