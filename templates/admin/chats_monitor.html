@@ -27,15 +27,25 @@
                     <div class="w-12 h-12 {% if room == 'global' %} bg-primary {% else %} bg-orange-500 {% endif %} rounded-2xl flex items-center justify-center text-white shadow-lg">
                         <i data-lucide="{% if room == 'global' %}globe{% else %}message-square{% endif %}" class="w-6 h-6"></i>
                     </div>
-                    <div>
-                        <h4 class="text-sm uppercase">{{ room }}</h4>
+                    <div class="overflow-hidden max-w-[120px] md:max-w-none">
+                        <h4 class="text-sm uppercase truncate">{{ room }}</h4>
                         <p class="text-[8px] text-gray-400 tracking-widest uppercase">{% if room == 'global' %}ОБЩИЙ КАНАЛ{% else %}ЛИЧНЫЙ ДИАЛОГ{% endif %}</p>
                     </div>
                 </div>
                 
-                <a href="/messages/{{ room }}" class="px-6 py-3 bg-white dark:bg-darkCard border dark:border-gray-700 rounded-2xl text-[9px] uppercase hover:bg-primary hover:text-white transition-all shadow-sm">
-                    ВОЙТИ В ЧАТ
-                </a>
+                <div class="flex items-center gap-2">
+                    <!-- КНОПКА ВОЙТИ -->
+                    <a href="/messages/{{ room }}" class="px-6 py-3 bg-white dark:bg-darkCard border dark:border-gray-700 rounded-2xl text-[9px] uppercase hover:bg-primary hover:text-white transition-all shadow-sm font-black">
+                        ВОЙТИ
+                    </a>
+
+                    <!-- КНОПКА УДАЛИТЬ (ОЧИСТИТЬ) -->
+                    <a href="{{ url_for('admin.clear_chat', room_id=room) }}" 
+                       onclick="return confirm('ВНИМАНИЕ! ВСЯ ИСТОРИЯ ЭТОГО ЧАТА БУДЕТ УДАЛЕНА НАВСЕГДА. ПРОДОЛЖИТЬ?')"
+                       class="p-3 bg-red-50 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-sm border border-transparent hover:border-red-600">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </a>
+                </div>
             </div>
             {% endfor %}
         </div>
