@@ -65,7 +65,7 @@
         <!-- ВВОД -->
         <div class="p-4 bg-white dark:bg-darkCard border-t dark:border-gray-800 pb-8 md:pb-4">
             <div class="max-w-4xl mx-auto flex items-center gap-3 bg-gray-100 dark:bg-darkBg rounded-2xl px-4 py-1 border-2 border-transparent focus-within:border-primary transition-all">
-                <input type="text" id="msgInput" placeholder="СООБЩЕНИЕ..." class="flex-1 bg-transparent outline-none py-4 text-sm font-black uppercase italic">
+                <input type="text" id="msgInput" maxlength="100" placeholder="СООБЩЕНИЕ..." class="flex-1 bg-transparent outline-none py-4 text-sm font-black uppercase italic">
                 <button onclick="sendMsg()" class="bg-primary text-white p-3 rounded-xl shadow-lg active:scale-90 transition-all">
                     <i data-lucide="send" class="w-5 h-5"></i>
                 </button>
@@ -118,21 +118,23 @@
         }
     }
 
-    function renderMessage(data) {
-        // Убираем пустой экран если он есть
-        if (document.getElementById('emptyState')) document.getElementById('emptyState').remove();
-
-        const isMe = data.user === myName || data.is_me;
-        const html = `
-            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2 animate-fadeIn">
-                ${!isMe ? `<span class="text-[7px] text-gray-400 mb-1 ml-2 font-black italic">${data.user}</span>` : ''}
-                <div class="max-w-[85%] px-5 py-3 rounded-[22px] text-[12px] shadow-sm ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-darkCard text-gray-800 dark:text-gray-100 rounded-tl-none border dark:border-gray-700'}">
-                    <p class="uppercase font-black leading-tight">${data.text}</p>
-                    <span class="text-[6px] opacity-40 mt-1 block text-right">${data.time}</span>
-                </div>
-            </div>`;
-        chatMessages.insertAdjacentHTML('beforeend', html);
-    }
+        function renderMessage(data) {
+            const isMe = data.user === myName || data.is_me;
+            const html = `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2 animate-fadeIn">
+                    ${!isMe ? `<span class="text-[7px] text-gray-400 mb-1 ml-2 font-black italic">${data.user}</span>` : ''}
+                    
+                    <!-- Добавили break-words и ограничение max-w-[200px] для эффекта "15-20 букв" -->
+                    <div class="max-w-[200px] md:max-w-[300px] px-5 py-3 rounded-[22px] text-[12px] shadow-sm 
+                        ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-darkCard text-gray-800 dark:text-gray-100 rounded-tl-none border dark:border-gray-700'} 
+                        break-words whitespace-pre-wrap">
+                        
+                        <p class="uppercase font-black leading-tight">${data.text}</p>
+                        <span class="text-[6px] opacity-40 mt-1 block text-right">${data.time}</span>
+                    </div>
+                </div>`;
+            chatMessages.insertAdjacentHTML('beforeend', html);
+        }
 
 function sendMsg() {
     const input = document.getElementById('msgInput');
