@@ -134,14 +134,31 @@
         chatMessages.insertAdjacentHTML('beforeend', html);
     }
 
-    function sendMsg() {
-        const input = document.getElementById('msgInput');
-        if (input.value.trim() && currentRoom) {
-            socket.emit('send_msg', { room: currentRoom, text: input.value.trim() });
-            input.value = "";
-            input.focus();
-        }
+function sendMsg() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    
+    if (text && currentRoom) {
+        // 1. Создаем объект сообщения для себя
+        const myMsg = {
+            text: text,
+            user: myName,
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            is_me: true,
+            room_id: currentRoom
+        };
+
+        // 2. Отрисовываем мгновенно (пользователь видит скорость!)
+        renderMessage(myMsg);
+        scrollToBottom();
+
+        // 3. Отправляем на сервер в фоне
+        socket.emit('send_msg', { room: currentRoom, text: text });
+        
+        input.value = "";
+        input.focus();
     }
+}
 
     function closeChat() {
         chatWindow.classList.add('translate-x-full');
