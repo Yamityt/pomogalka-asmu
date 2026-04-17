@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white dark:bg-darkCard rounded-[45px] p-8 md:p-14 shadow-sm border dark:border-gray-700 page-fade">
+    
+    <div class="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 italic font-black uppercase tracking-widest">
+        <h2 class="text-3xl flex items-center gap-5 leading-none">
+            <i data-lucide="book-open" class="text-primary w-10 h-10"></i> База знаний
+        </h2>
+        <div class="bg-blue-50 dark:bg-blue-900/30 text-primary dark:text-blue-300 px-6 py-3 rounded-2xl border border-blue-100 dark:border-blue-800 text-[10px] shadow-inner uppercase">
+            ДОСТУПНО: {{ files|length }} ФАЙЛОВ
+        </div>
+    </div>
+
+    <!-- КАТЕГОРИИ (ФИЛЬТРЫ) -->
+    <div class="flex flex-wrap gap-3 mb-12">
+        <button class="px-6 py-4 bg-primary text-white rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-xl shadow-primary/20">ВСЕ</button>
+        <button class="px-6 py-4 bg-gray-50 dark:bg-slate-800 text-gray-400 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:text-primary transition-all">ЭКЗАМЕНЫ</button>
+        <button class="px-6 py-4 bg-gray-100 dark:bg-slate-800 text-gray-400 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:text-primary transition-all">МЕТОДИЧКИ</button>
+    </div>
+
+    <!-- СПИСОК ФАЙЛОВ -->
+    <div class="space-y-4">
+        {% for file in files %}
+        <div class="group flex items-center justify-between p-6 md:p-8 border-4 border-gray-50 dark:border-gray-800/50 rounded-[35px] hover:border-primary/20 hover:bg-blue-50/5 transition-all">
+            <div class="flex items-center gap-6 md:gap-10">
+                <div class="w-14 h-14 bg-gray-50 dark:bg-darkBg rounded-2xl flex items-center justify-center text-gray-300 group-hover:text-primary transition-all shadow-inner">
+                    <i data-lucide="file-text" class="w-8 h-8"></i>
+                </div>
+                <div class="italic">
+                    <h4 class="font-black text-lg text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-none mb-2 group-hover:text-primary transition-colors">{{ file.name }}</h4>
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest opacity-60">
+                        {{ file.cat }} • {{ file.type }} • {{ file.size }}
+                    </p>
+                </div>
+            </div>
+            <button class="bg-white dark:bg-darkBg border-2 border-gray-100 dark:border-gray-700 p-4 rounded-xl hover:bg-primary hover:text-white transition-all active:scale-90 shadow-lg">
+                <i data-lucide="download" class="w-5 h-5"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-10 pb-20 page-fade">
+    
+    <div class="flex items-center justify-between">
+        <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Управление вузом</h2>
+        <div class="px-6 py-2 bg-red-500 text-white rounded-full text-[10px] font-black tracking-widest">ADMIN MODE</div>
+    </div>
+
+    <!-- АНАЛИТИКА -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-black italic">
+        <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border dark:border-gray-700 shadow-xl">
+            <p class="text-[9px] text-gray-400 uppercase mb-2">Активность</p>
+            <h3 class="text-4xl text-primary">{{ total_users }} чел.</h3>
+        </div>
+        <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border dark:border-gray-700 shadow-xl">
+            <p class="text-[9px] text-gray-400 uppercase mb-2">Всего запросов</p>
+            <h3 class="text-4xl text-accent">{{ total_questions }} ед.</h3>
+        </div>
+        <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border dark:border-gray-700 shadow-xl overflow-hidden">
+            <p class="text-[9px] text-gray-400 uppercase mb-4">Нагрузка по кафедрам</p>
+            <div class="space-y-2">
+                {% for sub, count in subjects_stats %}
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase">{{ sub }}</span>
+                    <span class="text-[10px] text-primary">{{ count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДЕРАЦИЯ -->
+    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
+        <h3 class="text-xl uppercase tracking-widest mb-10">Модерация контента</h3>
+        <div class="space-y-4">
+            {% for q in all_questions %}
+            <div class="flex items-center justify-between p-6 border-b dark:border-gray-800">
+                <div class="flex-1">
+                    <span class="text-[8px] text-primary uppercase">{{ q.subject }}</span>
+                    <p class="text-sm">"{{ q.text }}"</p>
+                    <span class="text-[8px] text-gray-400">Автор: {{ q.author_name }}</span>
+                </div>
+                <a href="/admin/delete_q/{{ q.id }}" class="p-4 text-red-500 hover:bg-red-50 rounded-2xl transition-all">
+                    <i data-lucide="trash-2" class="w-6 h-6"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- БАНЫ -->
+    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
+        <h3 class="text-xl uppercase tracking-widest mb-10">База студентов</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for u in users %}
+            <div class="p-6 bg-gray-50 dark:bg-darkBg rounded-3xl flex items-center justify-between border dark:border-gray-800">
+                <div>
+                    <h4 class="text-sm">{{ u.fullname }}</h4>
+                    <p class="text-[9px] text-gray-400 uppercase">{{ u.faculty }} • {{ u.points }} PTS</p>
+                </div>
+                <a href="/admin/ban_user/{{ u.id }}" class="px-6 py-2 rounded-xl text-[9px] uppercase transition-all 
+                    {{ 'bg-red-500 text-white' if not u.is_banned else 'bg-green-500 text-white shadow-lg shadow-green-500/20' }}">
+                    {{ 'БАН' if not u.is_banned else 'РАЗБАН' }}
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

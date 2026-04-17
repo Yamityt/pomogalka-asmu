@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-12 pb-32 md:pb-16 transition-all duration-500 italic">
+    
+    <!-- ========================================== -->
+    <!-- ЛЕВАЯ КОЛОНКА: ОСНОВНОЙ ПОТОК ЗАЯВОК      -->
+    <!-- ========================================== -->
+    <div class="flex-1 space-y-10 page-fade">
+        
+        <!-- БЛОК БЫСТРОГО СОЗДАНИЯ (ВИДЕН ТОЛЬКО НА ПК) -->
+        <div class="hidden md:flex bg-white dark:bg-darkCard p-8 rounded-[55px] shadow-sm items-center gap-6 border border-gray-100 dark:border-gray-800 hover:shadow-[0_25px_60px_rgba(0,0,0,0.06)] hover:border-primary/30 transition-all duration-500 group">
+            <div class="w-16 h-16 bg-gradient-to-tr from-primary to-blue-400 rounded-[22px] flex items-center justify-center text-white font-black text-2xl italic shadow-lg shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform">
+                {{ current_user.fullname[0] if current_user else 'A' }}
+            </div>
+            <button onclick="toggleModal()" class="flex-1 bg-[#F8FAFC] dark:bg-darkBg hover:bg-white dark:hover:bg-slate-800 text-left px-10 py-5 rounded-[30px] text-gray-400 text-sm font-black italic transition-all border-2 border-transparent focus:border-primary shadow-inner outline-none uppercase tracking-widest leading-none italic font-black">
+                НУЖНА ПОМОЩЬ? ОПИШИТЕ ПРОБЛЕМУ...
+            </button>
+            <div onclick="toggleModal()" class="bg-primary text-white p-4.5 rounded-[22px] cursor-pointer hover:rotate-90 transition-all duration-500 shadow-[0_12px_25px_rgba(0,85,164,0.3)] active:scale-90 flex items-center justify-center">
+                <i data-lucide="plus" class="w-8 h-8 italic font-black text-white"></i>
+            </div>
+        </div>
+
+        <!-- ЗАГОЛОВОК И СТАТУС СИСТЕМЫ (АДАПТИВНЫЙ) -->
+        <div class="flex items-center justify-between px-6 md:px-10 uppercase italic font-black text-gray-400 dark:text-gray-500 text-[10px] tracking-[0.4em] mb-4">
+            <span class="flex items-center gap-3 underline decoration-primary decoration-4 underline-offset-8">Поток активных заявок</span>
+            <div class="flex items-center gap-3 bg-green-50 dark:bg-green-900/10 px-5 py-2 rounded-full text-green-500 border border-green-100 dark:border-green-800/30">
+                <span class="relative flex h-2.5 w-2.5 italic">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 italic"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 shadow-[0_0_12px_#22c55e] italic"></span>
+                </span>
+                <span class="tracking-widest uppercase italic font-black text-[9px] md:text-[10px]">MONITORING LIVE</span>
+            </div>
+        </div>
+
+        <!-- ЦИКЛ ВЫВОДА КАРТОЧЕК ИЗ БАЗЫ ДАННЫХ -->
+        <div class="space-y-6 md:space-y-8 px-1 md:px-0">
+            {% for q in questions %}
+            <div class="bg-white dark:bg-darkCard rounded-[50px] md:rounded-[65px] p-8 md:p-14 shadow-sm border border-transparent hover:border-primary/30 transition-all duration-500 cursor-pointer group relative overflow-hidden animate-fadeIn">
+                <!-- Декоративное пятно фона -->
+                <div class="absolute -top-24 -right-24 w-80 h-80 bg-primary/5 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000 italic"></div>
+                
+                <div class="relative z-10 italic font-black uppercase">
+                    <!-- Хедер карточки (Предмет и Баллы) -->
+                    <div class="flex justify-between items-start mb-8 font-black uppercase text-[9px] md:text-[11px] tracking-widest italic font-black">
+                        <div class="flex gap-3 italic">
+                            <span class="bg-blue-50 dark:bg-blue-900/40 text-primary dark:text-blue-300 px-6 py-3 rounded-[22px] border border-blue-100 dark:border-blue-800 shadow-sm transition-all group-hover:border-primary/40 italic uppercase">
+                                {{ q.subject }}
+                            </span>
+                            <span class="hidden md:block bg-gray-50 dark:bg-slate-800 text-gray-400 px-5 py-3 rounded-[22px] border border-gray-100 dark:border-gray-700 italic font-black uppercase opacity-60">
+                                #{{ q.id }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-3 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/10 px-6 py-3 rounded-[25px] border border-green-100 dark:border-green-800/30 italic font-black">
+                            <i data-lucide="zap" class="w-4 h-4 fill-green-600 italic"></i>
+                            <span class="tracking-tighter font-black text-xs md:text-sm">+{{ q.pts }} PTS</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Основной текст вопроса -->
+                    <h3 class="text-gray-800 dark:text-white font-black text-xl md:text-4xl mb-12 md:mb-16 leading-[1.2] italic group-hover:text-primary dark:group-hover:text-blue-400 transition-colors uppercase tracking-tight italic">
+                        "{{ q.text }}"
+                    </h3>
+                    
+                    <!-- Футер карточки (Автор и Кнопки) -->
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-8 pt-10 border-t border-gray-100 dark:border-gray-800/50 uppercase italic font-black">
+                        <div class="flex items-center gap-5 italic w-full md:w-auto italic font-black">
+                            <div class="w-14 h-14 md:w-16 md:h-16 bg-gray-50 dark:bg-darkBg rounded-[25px] border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-300 italic shadow-inner italic font-black leading-none">
+                                <i data-lucide="user" class="w-6 h-6 italic opacity-50 italic font-black"></i>
+                            </div>
+                            <div class="flex flex-col italic font-black">
+                                <span class="text-[14px] md:text-[16px] text-gray-800 dark:text-gray-200 font-black uppercase tracking-widest leading-none mb-2 underline decoration-primary/20 decoration-4 underline-offset-4 italic font-black uppercase">{{ q.author_name }}</span>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] opacity-60 leading-none italic font-black italic uppercase">Запрос от: {{ q.date_created.strftime('%H:%M') }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3 md:gap-4 w-full md:w-auto italic font-black">
+                            <!-- Кнопка модерации (Для безопасника) -->
+                            <button onclick="alert('Объект передан модераторам для анализа безопасности')" class="p-6 md:p-7 bg-gray-50 dark:bg-slate-800 text-gray-400 rounded-[28px] md:rounded-[32px] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-90 shadow-sm border border-gray-100 dark:border-gray-700 italic font-black leading-none">
+                                <i data-lucide="shield-alert" class="w-6 h-6 italic font-black"></i>
+                            </button>
+                            
+                            <!-- Кнопка Откликнуться -->
+                            <button onclick="location.href='/give_help/{{ q.id }}'" class="flex-1 md:flex-none bg-orange-500 hover:bg-orange-600 text-white font-black py-5 md:py-7 px-14 md:px-24 rounded-[35px] md:rounded-[40px] transition-all uppercase tracking-[0.25em] text-[11px] md:text-[13px] shadow-[0_20px_45px_rgba(249,115,22,0.3)] active:scale-95 italic border-b-8 border-orange-700 hover:border-orange-800 font-black leading-none flex items-center justify-center">
+                                ОТКЛИКНУТЬСЯ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- Пустая лента -->
+            <div class="text-center py-40 bg-white dark:bg-darkCard rounded-[65px] border-4 border-dashed border-gray-100 dark:border-gray-800 transition-all group italic font-black uppercase tracking-widest opacity-80">
+                <div class="w-28 h-28 bg-gray-50 dark:bg-darkBg rounded-[45px] flex items-center justify-center mx-auto mb-10 shadow-inner group-hover:rotate-12 transition-transform italic font-black uppercase">
+                    <i data-lucide="layout-list" class="w-12 h-12 text-gray-200 dark:text-gray-700 italic opacity-40 italic font-black uppercase"></i>
+                </div>
+                <h4 class="text-gray-400 font-black uppercase italic tracking-[0.5em] mb-4 text-sm font-black italic">База данных пуста</h4>
+                <p class="text-[12px] text-gray-300 font-black uppercase italic tracking-widest opacity-60 font-black italic uppercase">Для теста зайдите под другим именем с телефона</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ПРАВАЯ ПАНЕЛЬ: ДОПОЛНИТЕЛЬНЫЕ ВИДЖЕТЫ     -->
+    <!-- ========================================== -->
+    <aside class="w-full lg:w-[380px] shrink-0 space-y-10 page-fade">
+        
+        <!-- МОДУЛЬ СРОЧНЫХ ЗАПРОСОВ (URGENT HOT) -->
+        <div class="bg-white dark:bg-darkCard rounded-[55px] p-10 shadow-sm border border-red-100 dark:border-red-900/20 relative overflow-hidden group transition-all duration-500 hover:shadow-[0_30px_70px_rgba(239,68,68,0.12)] italic font-black uppercase">
+            <div class="absolute -top-15 -right-15 w-56 h-56 bg-red-500/5 rounded-full blur-3xl group-hover:scale-150 transition-all duration-1000 italic font-black uppercase"></div>
+            <h4 class="text-[12px] text-red-500 tracking-[0.4em] mb-12 flex items-center gap-4 italic underline decoration-red-500/30 decoration-4 underline-offset-8 italic font-black uppercase">
+                <i data-lucide="flame" class="w-7 h-7 italic animate-bounce italic font-black uppercase"></i> Urgent Hot
+            </h4>
+            <div class="space-y-12 relative italic font-black uppercase">
+                {% for uq in urgent %}
+                <div onclick="location.href='/give_help/{{ uq.id }}'" class="cursor-pointer group/item transition-all hover:translate-x-2 italic font-black uppercase">
+                    <p class="text-base font-black text-gray-800 dark:text-gray-200 mb-4 group-hover/item:text-red-500 transition-colors leading-tight italic uppercase tracking-tighter italic font-black uppercase">
+                        "{{ uq.text[:65] }}..."
+                    </p>
+                    <div class="flex items-center justify-between italic font-black uppercase">
+                        <span class="text-[10px] text-gray-300 dark:text-gray-600 font-black italic tracking-widest uppercase underline decoration-gray-100 dark:decoration-gray-800 underline-offset-4 italic font-black uppercase">{{ uq.subject }}</span>
+                        <span class="text-[9px] bg-red-50 dark:bg-red-900/30 text-red-600 px-4 py-1.5 rounded-xl font-black italic tracking-tighter border border-red-100 dark:border-red-800/40 uppercase shadow-sm italic font-black uppercase">X2 BONUS</span>
+                    </div>
+                </div>
+                {% if not loop.last %}<div class="h-px bg-gray-50 dark:bg-gray-800 opacity-60 italic font-black uppercase"></div>{% endif %}
+                {% else %}
+                <p class="text-center text-[11px] text-gray-300 py-6 italic uppercase tracking-widest font-black opacity-50 underline decoration-gray-100 decoration-2 underline-offset-8 decoration-dotted italic font-black uppercase">Активных предложений нет</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- МОДУЛЬ ЛИДЕРОВ (РЕЙТИНГ ТОП-10 ИЗ БД) -->
+        <div class="bg-white dark:bg-darkCard rounded-[55px] p-10 shadow-sm border border-gray-100 dark:border-gray-700 transition-all hover:shadow-[0_25px_60px_rgba(0,0,0,0.05)] italic font-black uppercase">
+            <h4 class="text-[12px] text-gray-400 tracking-[0.4em] mb-14 flex items-center gap-4 italic font-black uppercase underline decoration-gray-200 dark:decoration-gray-800 decoration-4 underline-offset-8 italic font-black uppercase">
+                <i data-lucide="medal" class="w-7 h-7 text-warning italic italic font-black uppercase"></i> Top Leaders
+            </h4>
+            <div class="space-y-10 text-[14px] italic font-black uppercase">
+                {% for tu in top_users %}
+                <div class="flex items-center justify-between group cursor-pointer transition-all hover:translate-x-3 italic font-black uppercase">
+                    <div class="flex items-center gap-6 italic font-black uppercase italic font-black uppercase">
+                        <span class="text-primary/30 text-xl group-hover:scale-125 group-hover:text-primary transition-all italic tabular-nums italic font-black uppercase leading-none">{{ loop.index }}.</span>
+                        <div class="flex flex-col italic font-black uppercase">
+                            <span class="text-gray-700 dark:text-gray-300 tracking-tighter italic leading-none mb-2 group-hover:text-primary transition-colors underline decoration-primary/10 italic font-black uppercase">{{ tu.fullname }}</span>
+                            <span class="text-[9px] text-gray-400 tracking-widest uppercase opacity-60 italic font-black leading-none italic font-black uppercase italic font-black uppercase">{{ tu.course }}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end italic font-black uppercase">
+                        <span class="text-primary dark:text-blue-400 font-black tabular-nums italic text-lg italic font-black uppercase leading-none tracking-tighter">{{ tu.points }}</span>
+                        <span class="text-[8px] opacity-40 uppercase italic tracking-[0.3em] mt-1 font-black italic font-black uppercase leading-none">PTS</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="w-full mt-16 py-7 bg-gray-50 dark:bg-slate-800 rounded-[35px] text-[11px] font-black uppercase tracking-[0.3em] italic text-gray-400 hover:text-primary hover:bg-white dark:hover:bg-blue-900/10 transition-all border-2 border-transparent hover:border-primary/20 shadow-inner italic font-black uppercase">Весь рейтинг</button>
+        </div>
+    </aside>
+</div>
+
+<!-- ========================================== -->
+<!-- СИСТЕМА УВЕДОМЛЕНИЙ (MOBILE TOAST)         -->
+<!-- ========================================== -->
+<div id="toast" class="fixed bottom-36 md:bottom-16 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-auto bg-gray-900/95 dark:bg-darkCard/95 text-white px-12 py-8 rounded-[50px] shadow-[0_40px_90px_rgba(0,0,0,0.5)] z-[1000] flex items-center gap-8 md:gap-10 transition-all duration-1000 opacity-0 translate-y-32 pointer-events-none border border-white/10 backdrop-blur-3xl italic font-black uppercase">
+    <div class="bg-green-500 p-6 rounded-[30px] text-white shadow-[0_20px_40px_rgba(34,197,94,0.4)] rotate-12 group-hover:rotate-0 transition-transform duration-700 italic font-black uppercase">
+        <i data-lucide="check-circle" class="w-10 h-10 italic italic font-black uppercase"></i>
+    </div>
+    <div class="flex flex-col italic font-black uppercase tracking-widest italic font-black uppercase">
+        <span class="text-[18px] md:text-[22px] leading-none mb-4 text-white underline decoration-green-500 decoration-8 underline-offset-8 italic font-black uppercase">УСПЕХ!</span>
+        <span class="text-[10px] md:text-[11px] font-bold text-gray-400 leading-none italic uppercase tracking-[0.3em] italic font-black uppercase">ЗАПРОС ПРИНЯТ. ПЕРЕЙДИТЕ В ЧАТ.</span>
+    </div>
+</div>
+
+<script>
+    // Инициализация скриптов ленты
+    function showHelpToast() {
+        const toast = document.getElementById('toast');
+        // Плавный выезд уведомления
+        toast.classList.remove('opacity-0', 'translate-y-32', 'pointer-events-none');
+        
+        // Автоматическое скрытие через 5.5 секунд
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-y-32', 'pointer-events-none');
+        }, 5500);
+    }
+</script>
+{% endblock %}

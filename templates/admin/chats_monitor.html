@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-10 pb-20 page-fade">
+    
+    <div class="flex items-center justify-between">
+        <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Мониторинг связи</h2>
+        <div class="px-6 py-2 bg-blue-500 text-white rounded-full text-[10px] font-black tracking-widest uppercase">SECURE VIEW</div>
+    </div>
+
+    <!-- ИНФОРМАЦИЯ -->
+    <div class="bg-blue-50 dark:bg-blue-900/10 p-8 rounded-[40px] border-2 border-dashed border-blue-500/20 font-black italic">
+        <p class="text-[11px] text-blue-500 uppercase tracking-widest leading-relaxed">
+            Внимание: Как администратор, вы имеете доступ к просмотру всех диалогов системы. 
+            Используйте это только для пресечения накрутки баллов и нарушений правил вуза.
+        </p>
+    </div>
+
+    <!-- СПИСОК ВСЕХ КОМНАТ -->
+    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
+        <h3 class="text-xl uppercase tracking-widest mb-10">Активные комнаты ({{ rooms|length }})</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for room in rooms %}
+            <div class="flex items-center justify-between p-6 bg-gray-50 dark:bg-darkBg rounded-3xl border dark:border-gray-800 group hover:border-primary transition-all">
+                <div class="flex items-center gap-5">
+                    <div class="w-12 h-12 {% if room == 'global' %} bg-primary {% else %} bg-orange-500 {% endif %} rounded-2xl flex items-center justify-center text-white shadow-lg">
+                        <i data-lucide="{% if room == 'global' %}globe{% else %}message-square{% endif %}" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm uppercase">{{ room }}</h4>
+                        <p class="text-[8px] text-gray-400 tracking-widest uppercase">{% if room == 'global' %}ОБЩИЙ КАНАЛ{% else %}ЛИЧНЫЙ ДИАЛОГ{% endif %}</p>
+                    </div>
+                </div>
+                
+                <a href="/messages/{{ room }}" class="px-6 py-3 bg-white dark:bg-darkCard border dark:border-gray-700 rounded-2xl text-[9px] uppercase hover:bg-primary hover:text-white transition-all shadow-sm">
+                    ВОЙТИ В ЧАТ
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="bg-white dark:bg-darkCard rounded-[45px] p-8 md:p-12 shadow-sm border dark:border-gray-700 page-fade">
+    
+    <div class="mb-14 italic font-black uppercase tracking-widest text-center md:text-left">
+        <h2 class="text-3xl flex items-center justify-center md:justify-start gap-6 mb-4">
+            <i data-lucide="microscope" class="text-primary w-10 h-10"></i> Наука (МНО)
+        </h2>
+        <p class="text-gray-400 text-[10px] tracking-[0.4em] opacity-60">Молодежные научные общества кафедр АГМУ</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8 italic font-black uppercase">
+        {% for mno in societies %}
+        <div class="p-8 bg-gray-50 dark:bg-darkBg rounded-[40px] border-2 border-transparent hover:border-primary/20 transition-all group relative overflow-hidden">
+            <!-- ДЕКОР -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
+            
+            <div class="relative z-10">
+                <h4 class="text-xl text-gray-800 dark:text-white tracking-tighter mb-2 leading-tight underline decoration-primary/20 decoration-8 underline-offset-4">
+                    {{ mno.name }}
+                </h4>
+                <p class="text-[9px] text-primary dark:text-blue-400 tracking-widest mb-6">КУРАТОР: {{ mno.head }}</p>
+                
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 mb-8 leading-relaxed opacity-80">
+                    {{ mno.desc }}
+                </p>
+                
+                <a href="/messages/global" class="w-full inline-block text-center py-5 bg-white dark:bg-darkCard border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-[9px] tracking-[0.3em] hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm border-b-4 border-gray-300 active:scale-95">
+                    СВЯЗАТЬСЯ С ПРЕДСЕДАТЕЛЕМ
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

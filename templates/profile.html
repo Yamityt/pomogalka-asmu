@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-10 pb-24 page-fade transition-all duration-500">
+
+    <!-- КАРТОЧКА ПРОФИЛЯ -->
+    <div class="bg-white dark:bg-darkCard rounded-[50px] p-8 md:p-16 shadow-2xl border dark:border-gray-700 relative overflow-hidden group">
+        
+        <!-- ЛОГИКА РАНГА -->
+        {% set helps = user.helps_done %}
+        {% if helps < 5 %}
+            {% set rank = "НОВИЧОК" %}{% set color = "text-gray-400" %}{% set b_color = "border-gray-400" %}{% set bg_badge = "bg-gray-500/10" %}
+        {% elif helps < 15 %}
+            {% set rank = "РЕЗИДЕНТ" %}{% set color = "text-blue-500" %}{% set b_color = "border-blue-500" %}{% set bg_badge = "bg-blue-500/10" %}
+        {% elif helps < 30 %}
+            {% set rank = "МАГИСТР ПОМОЩИ" %}{% set color = "text-orange-500" %}{% set b_color = "border-orange-500" %}{% set bg_badge = "bg-orange-500/10" %}
+        {% else %}
+            {% set rank = "ЛЕГЕНДА АГМУ" %}{% set color = "text-red-500" %}{% set b_color = "border-red-500" %}{% set bg_badge = "bg-red-500/10" %}
+        {% endif %}
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-10">
+            <!-- Аватар -->
+            <div class="w-32 h-32 md:w-44 md:h-44 bg-primary rounded-[40px] flex items-center justify-center text-white text-6xl font-black italic border-8 {{ b_color }} shadow-2xl transition-all group-hover:rotate-3">
+                {{ user.fullname[0] }}
+            </div>
+
+            <div class="flex-1 text-center md:text-left">
+                <div class="flex flex-col md:flex-row md:items-center gap-4 mb-3">
+                    <h2 class="text-3xl md:text-5xl font-black text-gray-800 dark:text-white uppercase italic tracking-tighter">{{ user.fullname }}</h2>
+                    <div class="flex items-center gap-2 text-[10px] font-black text-green-500 bg-green-500/10 px-4 py-2 rounded-full border border-green-500/20 italic uppercase tracking-widest w-fit mx-auto md:mx-0">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Верифицирован
+                    </div>
+                </div>
+
+                <p class="text-gray-400 font-black italic text-[12px] tracking-widest uppercase mb-6 opacity-60">
+                    ID: {{ user.student_id }} • {{ user.faculty }} • <span class="text-primary">{{ user.course }}</span>
+                </p>
+                
+                <div class="inline-block px-8 py-2.5 rounded-full border-2 {{ b_color }} {{ color }} {{ bg_badge }} font-black text-[11px] tracking-[0.3em] uppercase mb-8 shadow-sm">
+                    СТАТУС: {{ rank }}
+                </div>
+
+                <div class="flex flex-wrap justify-center md:justify-start gap-6 font-black italic uppercase">
+                    <div class="bg-gray-50 dark:bg-darkBg px-8 py-5 rounded-[25px] border dark:border-gray-800 shadow-inner">
+                        <p class="text-[9px] text-gray-400 mb-1">Доступные баллы</p>
+                        <p class="text-3xl text-primary">{{ user.points }} PTS</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-darkBg px-8 py-5 rounded-[25px] border dark:border-gray-800 shadow-inner">
+                        <p class="text-[9px] text-gray-400 mb-1">Оказано помощи</p>
+                        <p class="text-3xl text-accent">{{ user.helps_done }} РАЗ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПОДТВЕРЖДЕНИЕ ПОМОЩИ (PENDING) -->
+    {% if pending %}
+    <div class="space-y-6 animate-fadeIn">
+        <h3 class="text-xl font-black uppercase italic tracking-widest text-orange-500 ml-8 flex items-center gap-4">
+            <i data-lucide="clock" class="w-6 h-6 animate-spin-slow"></i> Ожидает подтверждения
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 italic uppercase font-black">
+            {% for q in pending %}
+            <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border-2 border-orange-500/20 shadow-xl flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute -top-4 -right-4 p-6 opacity-5 group-hover:opacity-10 transition-all"><i data-lucide="help-circle" class="w-24 h-24"></i></div>
+                <div class="relative z-10">
+                    <span class="text-[9px] text-gray-400 tracking-widest mb-2 block">ЗАПРОС ПО: {{ q.subject }}</span>
+                    <p class="text-gray-800 dark:text-white text-lg mb-8 leading-tight">"{{ q.text }}"</p>
+                </div>
+                <a href="/confirm_help/{{ q.id }}" class="w-full bg-primary text-white py-5 rounded-2xl text-center text-[10px] tracking-[0.2em] shadow-xl hover:bg-blue-600 transition-all border-b-8 border-blue-900 active:scale-95">
+                    ПОДТВЕРДИТЬ ПОМОЩЬ (+{{ q.pts }} PTS)
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- МАГАЗИН МЕРЧА -->
+    <div class="space-y-8">
+        <h3 class="text-xl font-black uppercase italic tracking-widest text-gray-400 ml-8 flex items-center gap-4">
+            <i data-lucide="shopping-cart" class="w-6 h-6"></i> Обмен баллов на Мерч АГМУ
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 italic font-black uppercase text-center">
+            
+            <!-- КРУЖКА -->
+            <div class="bg-white dark:bg-darkCard p-10 rounded-[50px] border dark:border-gray-700 flex flex-col items-center group hover:border-primary transition-all duration-500 shadow-sm relative overflow-hidden">
+                <div class="w-24 h-24 bg-gray-50 dark:bg-darkBg rounded-3xl mb-6 flex items-center justify-center text-gray-300 group-hover:text-primary group-hover:rotate-6 transition-all">
+                    <i data-lucide="cup-soda" class="w-12 h-12"></i>
+                </div>
+                <h4 class="text-sm mb-2 text-gray-700 dark:text-gray-200 tracking-tighter italic font-black uppercase">Кружка "Digital ASMU"</h4>
+                <p class="text-primary text-2xl mb-8">500 PTS</p>
+                {% if user.points >= 500 %}
+                    <button onclick="openMerchModal('Кружка Digital ASMU')" class="w-full bg-primary text-white py-5 rounded-[22px] text-[10px] tracking-widest shadow-xl hover:bg-blue-600 transition-all border-b-8 border-blue-900 active:scale-95">ОБМЕНЯТЬ</button>
+                {% else %}
+                    <div class="w-full bg-gray-100 dark:bg-gray-800 text-gray-400 py-5 rounded-[22px] text-[10px] tracking-widest cursor-not-allowed opacity-50 font-black uppercase italic">НЕ ХВАТАЕТ БАЛЛОВ</div>
+                {% endif %}
+            </div>
+
+            <!-- ФУТБОЛКА -->
+            <div class="bg-white dark:bg-darkCard p-10 rounded-[50px] border dark:border-gray-700 flex flex-col items-center group hover:border-primary transition-all duration-500 shadow-sm relative overflow-hidden">
+                <div class="w-24 h-24 bg-gray-50 dark:bg-darkBg rounded-3xl mb-6 flex items-center justify-center text-gray-300 group-hover:text-primary group-hover:rotate-6 transition-all">
+                    <i data-lucide="shirt" class="w-12 h-12"></i>
+                </div>
+                <h4 class="text-sm mb-2 text-gray-700 dark:text-gray-200 tracking-tighter italic font-black uppercase">Футболка "Helper Team"</h4>
+                <p class="text-primary text-2xl mb-8">1500 PTS</p>
+                {% if user.points >= 1500 %}
+                    <button onclick="openMerchModal('Футболка Helper Team')" class="w-full bg-primary text-white py-5 rounded-[22px] text-[10px] tracking-widest shadow-xl hover:bg-blue-600 transition-all border-b-8 border-blue-900 active:scale-95">ОБМЕНЯТЬ</button>
+                {% else %}
+                    <div class="w-full bg-gray-100 dark:bg-gray-800 text-gray-400 py-5 rounded-[22px] text-[10px] tracking-widest cursor-not-allowed opacity-50 font-black uppercase italic">НЕ ХВАТАЕТ БАЛЛОВ</div>
+                {% endif %}
+            </div>
+
+            <!-- ХУДИ -->
+            <div class="bg-white dark:bg-darkCard p-10 rounded-[50px] border dark:border-gray-700 flex flex-col items-center group hover:border-primary transition-all duration-500 shadow-sm relative overflow-hidden">
+                <div class="w-24 h-24 bg-gray-50 dark:bg-darkBg rounded-3xl mb-6 flex items-center justify-center text-gray-300 group-hover:text-primary group-hover:rotate-6 transition-all">
+                    <i data-lucide="archive" class="w-12 h-12"></i>
+                </div>
+                <h4 class="text-sm mb-2 text-gray-700 dark:text-gray-200 tracking-tighter italic font-black uppercase">Толстовка (Limited)</h4>
+                <p class="text-primary text-2xl mb-8">3500 PTS</p>
+                {% if user.points >= 3500 %}
+                    <button onclick="openMerchModal('Толстовка Limited')" class="w-full bg-primary text-white py-5 rounded-[22px] text-[10px] tracking-widest shadow-xl hover:bg-blue-600 transition-all border-b-8 border-blue-900 active:scale-95">ОБМЕНЯТЬ</button>
+                {% else %}
+                    <div class="w-full bg-gray-100 dark:bg-gray-800 text-gray-400 py-5 rounded-[22px] text-[10px] tracking-widest cursor-not-allowed opacity-50 font-black uppercase italic">НЕ ХВАТАЕТ БАЛЛОВ</div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- НОВОЕ МОДАЛЬНОЕ ОКНО УСПЕХА -->
+<div id="merchModal" class="fixed inset-0 bg-black/80 backdrop-blur-xl z-[1000] flex items-center justify-center opacity-0 pointer-events-none transition-all duration-500 p-6">
+    <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-[60px] p-12 text-center border dark:border-gray-700 shadow-[0_50px_100px_rgba(0,0,0,0.5)] transform scale-90 transition-all duration-500 italic font-black uppercase">
+        <div class="w-24 h-24 bg-green-500 text-white rounded-[35px] flex items-center justify-center mx-auto mb-8 shadow-2xl animate-bounce">
+            <i data-lucide="gift" class="w-12 h-12"></i>
+        </div>
+        <h2 class="text-3xl text-gray-800 dark:text-white mb-2 tracking-tighter">ЗАЯВКА ПРИНЯТА!</h2>
+        <p id="merchName" class="text-primary mb-10 tracking-widest text-[11px]">КРУЖКА DIGITAL ASMU</p>
+        
+        <div class="bg-gray-50 dark:bg-darkBg p-8 rounded-[35px] border-2 border-dashed border-gray-200 dark:border-gray-800 mb-10">
+            <p class="text-[9px] text-gray-400 mb-2 tracking-widest">ВАШ УНИКАЛЬНЫЙ КОД</p>
+            <p id="merchCode" class="text-4xl text-gray-800 dark:text-white tracking-tighter">#AGMU-0000</p>
+        </div>
+
+        <p class="text-[10px] text-gray-400 mb-10 leading-relaxed tracking-widest">ПОКАЖИТЕ ЭТОТ КОД В СТУДЕНЧЕСКОМ СОВЕТЕ <br> (ГЛАВНЫЙ КОРПУС, 2 ЭТАЖ) ДЛЯ ПОЛУЧЕНИЯ.</p>
+        
+        <button onclick="closeMerchModal()" class="w-full bg-gray-900 text-white py-6 rounded-[25px] text-[11px] tracking-[0.3em] hover:bg-black transition-all">ЗАКРЫТЬ ОКНО</button>
+    </div>
+</div>
+
+<script>
+        async function openMerchModal(itemName) {
+        const res = await fetch('/api/redeem_merch', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ item: itemName })
+        });
+        
+        const data = await res.json();
+        
+        if (data.code) {
+            document.getElementById('merchName').innerText = itemName;
+            document.getElementById('merchCode').innerText = data.code;
+            document.getElementById('merchModal').classList.remove('opacity-0', 'pointer-events-none');
+            // Обновим баллы на странице без перезагрузки
+            location.reload(); 
+        } else {
+            alert(data.error || "Ошибка при обмене");
+        }
+    }
+</script>
+
+{% endblock %}

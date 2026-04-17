@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set me = current_user.fullname if current_user else session.get('user_name', '') %}
+
+<div class="bg-white dark:bg-darkCard rounded-[30px] md:rounded-[50px] shadow-2xl border border-gray-100 dark:border-gray-700 flex overflow-hidden h-[calc(100vh-140px)] md:h-[calc(100vh-180px)] relative page-fade">
+
+    <!-- ЛЕВАЯ ПАНЕЛЬ: СПИСОК ЧАТОВ -->
+    <aside id="sidePanel" class="w-full md:w-80 lg:w-96 border-r dark:border-gray-700 flex flex-col shrink-0 italic font-black uppercase tracking-widest bg-white dark:bg-slate-900 z-10">
+        <div class="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+            <h2 class="text-[11px] dark:text-white">МЕССЕНДЖЕР</h2>
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar">
+            {% for room in active_rooms %}
+            <div onclick="switchRoom('{{ room }}')" id="item-{{ room }}"
+            class="room-item p-5 flex items-center gap-4 cursor-pointer transition-all border-b dark:border-gray-800 hover:bg-blue-50/50 dark:hover:bg-slate-800">
+                
+                <div class="relative w-12 h-12 rounded-2xl flex items-center justify-center text-white text-[10px] font-black shrink-0 shadow-lg 
+                    {% if room == 'global' %} bg-primary {% else %} bg-orange-500 {% endif %}">
+                    {% if room == 'global' %}LIVE{% else %}PM{% endif %}
+                </div>
+
+                <div class="flex-1 overflow-hidden">
+                    <h4 class="text-[10px] dark:text-white truncate font-black">
+                        {% if room == 'global' %}
+                            ОБЩИЙ ПОТОК
+                        {% else %}
+                            ЛИЧНЫЙ ЧАТ
+                        {% endif %}
+                    </h4>
+                    <p class="text-[7px] text-slate-400">
+                        {% if room == 'global' %}ПУБЛИЧНЫЙ{% else %}ПРИВАТНЫЙ{% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ: ОКНО ЧАТА -->
+    <section id="chatWindow" class="fixed inset-0 md:relative md:inset-auto flex-1 flex flex-col bg-white dark:bg-darkBg z-50 md:z-20 transition-transform translate-x-full md:translate-x-0">
+
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+        <div class="p-4 md:p-6 bg-white dark:bg-darkCard border-b dark:border-gray-700 flex items-center gap-4">
+            <button onclick="closeChat()" class="md:hidden p-3 bg-gray-100 dark:bg-slate-800 rounded-2xl active:scale-90 transition-all">
+                <i data-lucide="arrow-left" class="w-6 h-6 text-primary"></i>
+            </button>
+            <div class="flex flex-col">
+                <h4 id="chatTitle" class="text-sm md:text-base font-black dark:text-white uppercase">ВЫБЕРИТЕ ЧАТ</h4>
+                <span id="connState" class="text-[7px] text-green-500 uppercase tracking-widest">LIVE CONNECTION</span>
+            </div>
+        </div>
+
+        <!-- СООБЩЕНИЯ -->
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-5 space-y-4 flex flex-col no-scrollbar bg-[#F8FAFC] dark:bg-darkBg/30">
+            <!-- Приветствие -->
+            <div id="emptyState" class="m-auto text-center opacity-20 uppercase text-[10px] py-20">
+                <i data-lucide="message-square" class="w-12 h-12 mx-auto mb-2"></i>
+                Выберите диалог
+            </div>
+        </div>
+
+        <!-- ВВОД -->
+        <div class="p-4 bg-white dark:bg-darkCard border-t dark:border-gray-800 pb-8 md:pb-4">
+            <div class="max-w-4xl mx-auto flex items-center gap-3 bg-gray-100 dark:bg-darkBg rounded-2xl px-4 py-1 border-2 border-transparent focus-within:border-primary transition-all">
+                <input type="text" id="msgInput" placeholder="СООБЩЕНИЕ..." class="flex-1 bg-transparent outline-none py-4 text-sm font-black uppercase italic">
+                <button onclick="sendMsg()" class="bg-primary text-white p-3 rounded-xl shadow-lg active:scale-90 transition-all">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    let currentRoom = "";
+    const myName = {{ me|tojson }};
+    const chatMessages = document.getElementById('chatMessages');
+    const chatWindow = document.getElementById('chatWindow');
+    const chatTitle = document.getElementById('chatTitle');
+    const emptyState = document.getElementById('emptyState');
+
+    async function switchRoom(roomId) {
+        if (currentRoom) socket.emit('leave', { room: currentRoom });
+        
+        currentRoom = roomId;
+        socket.emit('join', { room: roomId });
+
+        // Обновляем заголовок
+        chatTitle.innerText = roomId === 'global' ? 'ОБЩИЙ ПОТОК ПОМОЩИ' : `ЧАТ: ${roomId}`;
+        
+        // Активный пункт в списке
+        document.querySelectorAll('.room-item').forEach(el => el.classList.remove('bg-blue-50', 'dark:bg-blue-900/20', 'border-l-4', 'border-primary'));
+        const activeItem = document.getElementById(`item-${roomId}`);
+        if(activeItem) activeItem.classList.add('bg-blue-50', 'dark:bg-blue-900/20', 'border-l-4', 'border-primary');
+
+        // Мобильная анимация: выезжаем
+        chatWindow.classList.remove('translate-x-full');
+
+        // Загрузка истории
+        try {
+            const res = await fetch(`/api/messages/${roomId}`);
+            if (!res.ok) throw new Error('Not Found');
+            const history = await res.json();
+            
+            chatMessages.innerHTML = "";
+            if (history.length === 0) {
+                chatMessages.innerHTML = '<div class="text-center opacity-20 text-[8px] py-10 uppercase font-black italic">История пуста. Начните общение!</div>';
+            } else {
+                history.forEach(msg => renderMessage(msg));
+            }
+            scrollToBottom();
+        } catch (err) {
+            console.error(err);
+            chatMessages.innerHTML = '<div class="text-center text-red-500 text-[10px] py-10 font-black italic">ОШИБКА ЗАГРУЗКИ. ПРОВЕРЬТЕ PYTHON КОД API!</div>';
+        }
+    }
+
+    function renderMessage(data) {
+        // Убираем пустой экран если он есть
+        if (document.getElementById('emptyState')) document.getElementById('emptyState').remove();
+
+        const isMe = data.user === myName || data.is_me;
+        const html = `
+            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2 animate-fadeIn">
+                ${!isMe ? `<span class="text-[7px] text-gray-400 mb-1 ml-2 font-black italic">${data.user}</span>` : ''}
+                <div class="max-w-[85%] px-5 py-3 rounded-[22px] text-[12px] shadow-sm ${isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-darkCard text-gray-800 dark:text-gray-100 rounded-tl-none border dark:border-gray-700'}">
+                    <p class="uppercase font-black leading-tight">${data.text}</p>
+                    <span class="text-[6px] opacity-40 mt-1 block text-right">${data.time}</span>
+                </div>
+            </div>`;
+        chatMessages.insertAdjacentHTML('beforeend', html);
+    }
+
+    function sendMsg() {
+        const input = document.getElementById('msgInput');
+        if (input.value.trim() && currentRoom) {
+            socket.emit('send_msg', { room: currentRoom, text: input.value.trim() });
+            input.value = "";
+            input.focus();
+        }
+    }
+
+    function closeChat() {
+        chatWindow.classList.add('translate-x-full');
+        currentRoom = "";
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+    }
+
+    socket.on('receive_msg', (data) => {
+        if (data.room_id === currentRoom) {
+            renderMessage(data);
+            scrollToBottom();
+        }
+    });
+
+    // На ПК открываем глобал сразу
+    if (window.innerWidth >= 768) {
+        switchRoom('global');
+    }
+
+    document.getElementById('msgInput').onkeypress = (e) => { if(e.key === 'Enter') sendMsg() };
+    lucide.createIcons();
+</script>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+{% endblock %}

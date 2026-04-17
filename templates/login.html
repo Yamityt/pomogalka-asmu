@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — Помогалка АГМУ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #0F172A; display: flex; align-items: center; justify-content: center; min-height: 100vh; color: white; overflow: hidden; }
+        .glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(0,85,164,0.15) 0%, rgba(15,23,42,0) 70%); z-index: -1; }
+    </style>
+</head>
+<body class="italic font-black tracking-tighter">
+    <div class="glow"></div>
+    <div class="max-w-md w-full p-6">
+        <div class="text-center mb-10">
+            <div class="bg-primary inline-block p-4 rounded-3xl shadow-2xl rotate-3 mb-6">
+                <span class="text-5xl uppercase">П</span>
+            </div>
+            <h1 class="text-3xl">Экосистема АГМУ</h1>
+            <p class="text-[9px] text-slate-500 tracking-[0.5em] mt-2 opacity-50 uppercase">Закрытый цифровой узел</p>
+        </div>
+        <div class="bg-slate-900/60 backdrop-blur-3xl border border-white/5 p-10 rounded-[50px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)]">
+            <h2 class="text-xl text-center mb-10 tracking-widest uppercase">Авторизация</h2>
+            <form action="/login" method="POST" class="space-y-8">
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 ml-6 tracking-widest uppercase italic">№ Студенческого</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5"></i>
+                        <!-- УБРАЛ uppercase ИЗ input -->
+                        <input type="text" name="student_id" required placeholder="Введите ваш ID" class="w-full bg-slate-800/50 border-2 border-transparent focus:border-primary p-6 rounded-[30px] pl-16 outline-none transition-all text-white italic">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 ml-6 tracking-widest uppercase italic">Личный Пароль</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-600 w-5 h-5"></i>
+                        <input type="password" name="password" required placeholder="••••••••" class="w-full bg-slate-800/50 border-2 border-transparent focus:border-primary p-6 rounded-[30px] pl-16 outline-none transition-all text-white tracking-[0.4em]">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-[#0055A4] text-white py-8 rounded-[35px] font-black uppercase shadow-2xl hover:bg-blue-600 active:scale-95 transition-all border-b-8 border-blue-900">
+                    Войти в систему
+                </button>
+                {% if error %}
+                <p class="text-center text-red-500 text-[10px] font-black mt-4 animate-bounce uppercase">{{ error }}</p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
