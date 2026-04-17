@@ -11,7 +11,7 @@ from models import db, User, Question, Message, MerchOrder
 app = Flask(__name__)
 
 # --- ПОЛНАЯ КОНФИГУРАЦИЯ ---
-app.config['SECRET_KEY'] = 'agmu_stable_v10_secure'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_key_for_local_dev')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads' # <--- ВОТ ЭТОЙ СТРОКИ НЕ ХВАТАЛО
