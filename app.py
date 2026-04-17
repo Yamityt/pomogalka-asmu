@@ -91,16 +91,27 @@ def login():
         
         user = User.query.filter_by(student_id=sid).first()
         
+        # 1. Проверяем существование пользователя и верность пароля
         if user and check_password_hash(user.password, pwd):
-            # КРИТИЧЕСКАЯ ПРОВЕРКА:
+            
+            # 2. Проверяем, не забанен ли он
             if user.is_banned:
                 return render_template('login.html', error=f"Ваш аккаунт заблокирован! Причина: {user.ban_reason}")
+            
+            # 3. Если ВСЁ ОК — сохраняем IP и логиним
+            user.last_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+            db.session.commit()
             
             session['user_id'] = user.id
             session['user_name'] = user.fullname
             return redirect(url_for('index'))
             
-        return render_template('login.html', error="Неверный ID или пароль")
+        else:
+            # Сюда попадаем, если пользователя нет или пароль неверный
+            import time
+            time.sleep(1) # Замедляем перебор
+            return render_template('login.html', error="Неверный ID или пароль")
+
     return render_template('login.html')
 
 @app.route('/')
@@ -297,9 +308,12 @@ def register_user(data):
 
 @socketio.on('send_msg')
 def handle_msg(data):
-    # Проверяем, залогинен ли пользователь вообще
-    if 'user_id' not in session:
-        return False 
+    if 'user_id' not in session: return False 
+
+    text = data.get('text', '').strip()
+
+    if not text or len(text) > 400:
+        return False # Слишком длинное или пустое сообщение не пройдет
         
     user = get_current_user()
     if not user or user.is_banned:
@@ -309,8 +323,9 @@ def handle_msg(data):
     # БЕЗОПАСНОСТЬ: Если это личный чат (начинается с chat_), 
     # проверяем, принадлежит ли он этому пользователю
     if room.startswith('chat_'):
-        if str(user.id) not in room:
-            return False # Чужой не может писать в личку!
+        room_parts = room.split('_')
+        if str(user.id) not in room_parts:
+            return False 
 
     # Если всё ок — отправляем
     new_m = Message(room_id=room, text=data['text'], author_name=user.fullname)
