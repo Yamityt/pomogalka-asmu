@@ -314,6 +314,8 @@ def handle_msg(data):
     room = data['room']
     text = data['text']
     
+    if not text or len(text) > 100:
+        return # Игнорируем слишком длинные сообщения
     # Сохраняем в базу
     new_m = Message(room_id=room, text=text, author_name=user.fullname)
     db.session.add(new_m)
