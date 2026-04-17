@@ -10,6 +10,11 @@ from models import db, User, Question, Message, MerchOrder
 
 app = Flask(__name__)
 
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,  # Запрещает JS доступ к кукам сессии
+    SESSION_COOKIE_SECURE=True,    # Куки передаются только по HTTPS (на Render это есть)
+    SESSION_COOKIE_SAMESITE='Lax', # Защита от CSRF атак
+)
 # --- ПОЛНАЯ КОНФИГУРАЦИЯ ---
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_key_for_local_dev')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
