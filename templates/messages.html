@@ -169,7 +169,10 @@ function sendMsg() {
         chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
     }
 
+    socket.off('receive_msg');
+    
     socket.on('receive_msg', (data) => {
+        console.log("NEW MSG:", data);
         if (data.room_id === currentRoom) {
             renderMessage(data);
             scrollToBottom();
