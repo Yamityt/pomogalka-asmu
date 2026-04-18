@@ -235,15 +235,25 @@ def redeem():
     item = request.json.get('item')
     code = f"AGMU-{random.randint(1000, 9999)}"
     
-    # Проверка баллов на сервере (чтобы не взломали через JS)
-    prices = {"Кружка": 500, "Футболка": 1500}
-    if user.points >= prices.get(item, 99999):
-        user.points -= prices[item]
+    # ПРАВИЛЬНЫЕ НАЗВАНИЯ (должны совпадать с кнопками в HTML)
+    prices = {
+        'Кружка Digital ASMU': 500, 
+        'Футболка Helper Team': 1500,
+        'Толстовка Limited': 3500
+    }
+    
+    price = prices.get(item)
+    if price is None:
+        return jsonify({'error': 'Товар не найден'}), 400
+
+    if user.points >= price:
+        user.points -= price
         new_order = MerchOrder(user_id=user.id, item_name=item, code=code)
         db.session.add(new_order)
         db.session.commit()
         return jsonify({'code': code})
-    return jsonify({'error': 'Недостаточно баллов'}), 400
+    
+    return jsonify({'error': f'Недостаточно баллов. Нужно {price}, у вас {user.points}'}), 400
 
 @app.route('/give_help/<int:q_id>')
 def give_help(q_id):
