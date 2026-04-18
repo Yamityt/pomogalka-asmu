@@ -1,23 +1,23 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request, current_app
+from models import MerchOrder
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 def admin_required(f):
+    @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Импортируем внутри функции, чтобы избежать круговой зависимости
-        from app import db, User
-        
         user_id = session.get('user_id')
+
         if not user_id:
             return redirect(url_for('login'))
-            
-        # Используем db.session.get — это работает лучше внутри блюпринтов
+
         user = db.session.get(User, user_id)
-        
+
         if not user or not user.is_admin:
             return "ДОСТУП ЗАПРЕЩЕН: ТРЕБУЮТСЯ ПРАВА АДМИНИСТРАТОРА", 403
+
         return f(*args, **kwargs)
-    decorated_function.__name__ = f.__name__
+
     return decorated_function
 
 @admin_bp.route('/')
@@ -27,19 +27,36 @@ def dashboard():
     
     users = User.query.all()
     questions = Question.query.all()
-    orders = MerchOrder.query.all()
+    orders = MerchOrder.query.order_by(MerchOrder.date_created.desc()).all()
     
     # Анти-фрод
-    suspicious = db.session.execute(db.text(
-        "SELECT author_id, helper_id, COUNT(*) as count FROM question "
-        "WHERE status='solved' GROUP BY author_id, helper_id HAVING count > 2"
-    )).fetchall()
+    
+    return render_template(
+        'admin/dashboard.html',
+        users=users,
+        all_questions=all_questions,
+        total_users=total_users,
+        total_questions=total_questions,
+        subjects_stats=subjects_stats,
+        orders=orders 
+    )
 
-    return render_template('admin/dashboard.html', 
-                           users=users, 
-                           questions=questions, 
-                           orders=orders,
-                           suspicious=suspicious)
+@admin_bp.route('/approve_order/<int:order_id>')
+def approve_order(order_id):
+    order = MerchOrder.query.get(order_id)
+    if order:
+        order.status = 'approved'
+        db.session.commit()
+    return redirect('/admin')
+
+
+@admin_bp.route('/reject_order/<int:order_id>')
+def reject_order(order_id):
+    order = MerchOrder.query.get(order_id)
+    if order:
+        order.status = 'rejected'
+        db.session.commit()
+    return redirect('/admin')
 
 @admin_bp.route('/ban/<int:user_id>', methods=['POST'])
 @admin_required
