@@ -211,8 +211,6 @@
     <div class="max-w-7xl mx-auto px-4 py-6 md:py-12 flex flex-col md:flex-row gap-8 md:gap-12">
         
         <!-- САЙДБАР ДЕСКТОП -->
-        <!-- САЙДБАР (Адаптивный под роль) -->
-<!-- ПОЛНЫЙ САЙДБАР (Адаптивный) -->
         <aside class="hidden md:block w-72 shrink-0">
             <div class="bg-white dark:bg-darkCard rounded-[45px] p-8 shadow-sm sticky top-32 border border-gray-100 dark:border-gray-700 shadow-xl">
                 <nav class="space-y-3 text-[11px] tracking-[0.2em]">
@@ -272,29 +270,35 @@
     </div>
 
     <!-- МОБИЛЬНЫЙ ТАББАР -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav border-t dark:border-gray-700 px-4 py-5 flex justify-between items-center z-[200] shadow-[0_-15px_45px_rgba(0,0,0,0.12)] rounded-t-[40px]">
-        <a href="/" class="flex flex-col items-center gap-1.5 text-gray-400 hover:text-primary transition-all">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 glass-nav border-t dark:border-gray-700 px-6 py-5 flex justify-between items-center z-[200] shadow-[0_-15px_45px_rgba(0,0,0,0.12)] rounded-t-[40px]">
+        <a href="/" class="flex flex-col items-center gap-2 text-gray-400 hover:text-primary transition-all group">
             <i data-lucide="home" class="w-6 h-6"></i>
-            <span class="text-[7px] font-black uppercase tracking-widest">ДОМ</span>
+            <span class="text-[8px] tracking-widest font-black uppercase">ДОМ</span>
         </a>
         <a href="/messages/global" class="flex flex-col items-center gap-2 text-gray-400 hover:text-primary transition-all relative group">
             <i data-lucide="message-square" class="w-7 h-7 group-active:rotate-12 transition-all"></i>
             <span class="text-[8px] tracking-widest leading-none">ЧАТ</span>
             <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-darkCard"></span>
         </a>
+
+                <!-- КНОПКА КАРТЫ -->
+        <a href="/map" class="flex flex-col items-center gap-2 text-gray-400 hover:text-primary transition-all group">
+            <i data-lucide="map-pin" class="w-6 h-6"></i>
+            <span class="text-[8px] tracking-widest font-black uppercase">КАРТА</span>
+        </a>
         
         <!-- ЦЕНТРАЛЬНАЯ КНОПКА FAB -->
-        <button onclick="toggleModal()" class="bg-primary text-white p-5 rounded-[28px] shadow-[0_15px_35px_rgba(0,85,164,0.4)] -mt-24 border-[10px] border-[#F0F2F5] dark:border-darkBg active:scale-90 transition-all duration-500">
-            <i data-lucide="plus" class="w-8 h-8 text-white"></i>
+        <button onclick="toggleModal()" class="bg-primary text-white p-5 rounded-[25px] shadow-lg -mt-20 border-[8px] border-[#F0F2F5] dark:border-darkBg active:scale-90 transition-all">
+            <i data-lucide="plus" class="w-7 h-7"></i>
         </button>
 
-        <a href="/library" class="flex flex-col items-center gap-2 text-gray-400 hover:text-primary transition-all group">
-            <i data-lucide="folder-open" class="w-7 h-7 group-active:scale-110"></i>
-            <span class="text-[8px] tracking-widest leading-none">БАЗА</span>
+        <a href="/messages/global" class="flex flex-col items-center gap-2 text-gray-400 hover:text-primary transition-all relative group">
+            <i data-lucide="message-square" class="w-6 h-6"></i>
+            <span class="text-[8px] tracking-widest font-black uppercase">ЧАТ</span>
         </a>
         <a href="/profile" class="flex flex-col items-center gap-2 text-gray-400 hover:text-primary transition-all group">
-            <i data-lucide="user" class="w-7 h-7 group-active:rotate-12"></i>
-            <span class="text-[8px] tracking-widest leading-none">Я</span>
+            <i data-lucide="user" class="w-6 h-6"></i>
+            <span class="text-[8px] tracking-widest font-black uppercase">Я</span>
         </a>
     </nav>
 
