@@ -40,6 +40,12 @@ MAP_DATA = [
     {'id': 'bakin', 'title': 'Главный корпус АГМУ', 'addr': 'ул. Бакинская, 121'},
     {'id': 'mech', 'title': 'Учебный корпус №2', 'addr': 'ул. Мечникова, 20'}
 ]
+# Данные для раздела МНО (Наука)
+SOCIETIES_DATA = [
+    {'name': 'МНО Кафедры Анатомии', 'head': 'проф. Котов С.В.', 'desc': 'Изучение топографической анатомии и вариантной изменчивости сосудов.'},
+    {'name': 'МНО Кафедры Биохимии', 'head': 'доц. Левина А.М.', 'desc': 'Исследование молекулярных механизмов обмена веществ.'},
+    {'name': 'МНО Кафедры Гистологии', 'head': 'проф. Самойлов И.Р.', 'desc': 'Анализ микроструктур тканей при различных патологиях.'}
+]
 
 # --- ИНИЦИАЛИЗАЦИЯ БАЗЫ ---
 def seed_db():
@@ -266,6 +272,12 @@ def confirm_help(q_id):
         db.session.commit()
     return redirect(url_for('profile'))
 
+@app.route('/science')
+def science():
+    if not get_current_user(): return redirect(url_for('login'))
+    # Передаем данные в шаблон
+    return render_template('mno.html', societies=SOCIETIES_DATA)
+    
 @app.route('/logout')
 def logout():
     session.clear()
