@@ -78,7 +78,33 @@
             {% endfor %}
         </div>
     </div>
-
+    
+    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
+        <h3 class="text-xl uppercase tracking-widest mb-10">Талоны (Merch)</h3>
+    
+        <div class="space-y-4">
+            {% for o in orders %}
+            <div class="flex items-center justify-between p-6 border-b">
+    
+                <div>
+                    <p class="text-sm">{{ o.item_name }}</p>
+                    <span class="text-[10px] text-gray-400">Код: {{ o.code }}</span><br>
+                    <span class="text-[10px]">Пользователь ID: {{ o.user_id }}</span>
+                </div>
+    
+                <div class="flex gap-2">
+                    {% if o.status == 'pending' %}
+                        <a href="/admin/approve_order/{{ o.id }}" class="px-4 py-2 bg-green-500 text-white rounded-xl text-xs">✔</a>
+                        <a href="/admin/reject_order/{{ o.id }}" class="px-4 py-2 bg-red-500 text-white rounded-xl text-xs">✖</a>
+                    {% else %}
+                        <span class="text-[10px] uppercase">{{ o.status }}</span>
+                    {% endif %}
+                </div>
+    
+            </div>
+            {% endfor %}
+        </div>
+    </div>
     <!-- ВЫДАЧА МЕРЧА -->
     <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
         <h3 class="text-xl uppercase tracking-widest mb-10">Выдача кодов (Студсовет)</h3>
