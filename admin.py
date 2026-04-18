@@ -41,6 +41,9 @@ def dashboard():
         db.func.count(Question.id)
     ).group_by(Question.subject).all()
 
+    # (если используешь анти-фрод — можно позже добавить)
+    suspicious = []
+
     return render_template(
         'admin/dashboard.html',
         users=users,
@@ -48,31 +51,19 @@ def dashboard():
         total_users=total_users,
         total_questions=total_questions,
         subjects_stats=subjects_stats,
-        orders=orders
+        orders=orders,
+        suspicious=suspicious
     )
 
 
-# ✅ ПОДТВЕРДИТЬ ТАЛОН
-@admin_bp.route('/approve_order/<int:order_id>')
+# ❌ УДАЛЕНИЕ ВОПРОСА
+@admin_bp.route('/delete_q/<int:q_id>')
 @admin_required
-def approve_order(order_id):
-    order = MerchOrder.query.get(order_id)
+def delete_q(q_id):
+    q = Question.query.get(q_id)
 
-    if order:
-        order.status = 'approved'
-        db.session.commit()
-
-    return redirect(url_for('admin.dashboard'))
-
-
-# ❌ ОТКЛОНИТЬ ТАЛОН
-@admin_bp.route('/reject_order/<int:order_id>')
-@admin_required
-def reject_order(order_id):
-    order = MerchOrder.query.get(order_id)
-
-    if order:
-        order.status = 'rejected'
+    if q:
+        db.session.delete(q)
         db.session.commit()
 
     return redirect(url_for('admin.dashboard'))
@@ -92,6 +83,7 @@ def ban_user(user_id):
         user.ban_reason = reason
         db.session.commit()
 
+        # 🔥 мгновенно выкидываем
         socketio.emit(
             'force_disconnect',
             {'reason': reason},
@@ -115,17 +107,71 @@ def unban_user(user_id):
     return redirect(url_for('admin.dashboard'))
 
 
-# 🧹 ОЧИСТКА ЧАТА
-@admin_bp.route('/clear_chat/<room_id>')
+# =========================
+# 🎟️ ТАЛОНЫ (MERCH)
+# =========================
+
+# ✅ ПОДТВЕРДИТЬ
+@admin_bp.route('/approve_order/<int:order_id>')
 @admin_required
-def clear_chat(room_id):
-    Message.query.filter_by(room_id=room_id).delete()
-    db.session.commit()
+def approve_order(order_id):
+    order = MerchOrder.query.get(order_id)
 
-    return redirect(url_for('admin.view_all_chats'))
+    if order:
+        order.status = 'approved'
+        db.session.commit()
+
+    return redirect(url_for('admin.dashboard'))
 
 
-# 💬 СПИСОК ЧАТОВ
+# ❌ ОТКЛОНИТЬ
+@admin_bp.route('/reject_order/<int:order_id>')
+@admin_required
+def reject_order(order_id):
+    order = MerchOrder.query.get(order_id)
+
+    if order:
+        order.status = 'rejected'
+        db.session.commit()
+
+    return redirect(url_for('admin.dashboard'))
+
+
+# 🎯 ОТМЕТИТЬ КАК ВЫДАН
+@admin_bp.route('/use_order/<int:order_id>')
+@admin_required
+def use_order(order_id):
+    order = MerchOrder.query.get(order_id)
+
+    if order and order.status == 'approved':
+        order.status = 'used'
+        db.session.commit()
+
+    return redirect(url_for('admin.dashboard'))
+
+
+# 🔍 ПРОВЕРКА КОДА (по желанию)
+@admin_bp.route('/check_code/<code>')
+@admin_required
+def check_code(code):
+    order = MerchOrder.query.filter_by(code=code).first()
+
+    if not order:
+        return f"КОД {code} НЕ НАЙДЕН"
+
+    return f"""
+        <h2>КОД: {order.code}</h2>
+        <p>Товар: {order.item_name}</p>
+        <p>Статус: {order.status}</p>
+        <p>User ID: {order.user_id}</p>
+    """
+
+
+# =========================
+# 💬 ЧАТЫ
+# =========================
+
+# 📜 СПИСОК ЧАТОВ
 @admin_bp.route('/chats')
 @admin_required
 def view_all_chats():
@@ -139,7 +185,8 @@ def view_all_chats():
 @admin_bp.route('/spy_chat/<room_id>')
 @admin_required
 def spy_chat(room_id):
-    history = Message.query.filter_by(room_id=room_id).order_by(Message.timestamp.asc()).all()
+    history = Message.query.filter_by(room_id=room_id)\
+        .order_by(Message.timestamp.asc()).all()
 
     return render_template(
         'messages.html',
@@ -147,3 +194,13 @@ def spy_chat(room_id):
         history=history,
         active_rooms=['global', room_id]
     )
+
+
+# 🧹 ОЧИСТКА ЧАТА
+@admin_bp.route('/clear_chat/<room_id>')
+@admin_required
+def clear_chat(room_id):
+    Message.query.filter_by(room_id=room_id).delete()
+    db.session.commit()
+
+    return redirect(url_for('admin.view_all_chats'))
