@@ -3,121 +3,135 @@
 {% block content %}
 <div class="space-y-10 pb-20 page-fade">
     
+    <!-- HEADER -->
     <div class="flex items-center justify-between">
-        <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-800 dark:text-white">Управление вузом</h2>
-        <div class="px-6 py-2 bg-red-500 text-white rounded-full text-[10px] font-black tracking-widest uppercase">ADMIN MODE</div>
-    </div>
-
-    <!-- АНАЛИТИКА -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-black italic">
-        <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border dark:border-gray-700 shadow-xl">
-            <p class="text-[9px] text-gray-400 uppercase mb-2">Всего студентов</p>
-            <h3 class="text-4xl text-primary">{{ users|length }} чел.</h3>
-        </div>
-        <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border dark:border-gray-700 shadow-xl">
-            <p class="text-[9px] text-gray-400 uppercase mb-2">Заказов мерча</p>
-            <h3 class="text-4xl text-accent">{{ orders|length }} ед.</h3>
-        </div>
-        <div class="bg-white dark:bg-darkCard p-8 rounded-[40px] border dark:border-gray-700 shadow-xl">
-            <p class="text-[9px] text-red-400 uppercase mb-2">Подозрительные пары</p>
-            <h3 class="text-4xl text-red-500">{{ suspicious|length }}</h3>
+        <h2 class="text-4xl font-black uppercase tracking-tight text-gray-800 dark:text-white">
+            Управление вузом
+        </h2>
+        <div class="px-6 py-2 bg-red-500 text-white rounded-full text-[10px] font-bold uppercase">
+            ADMIN MODE
         </div>
     </div>
 
-    <!-- АНТИ-ФРОД ПАНЕЛЬ -->
-    {% if suspicious %}
-    <div class="bg-red-50 dark:bg-red-900/10 rounded-[50px] p-10 border-2 border-dashed border-red-500/30 font-black italic">
-        <h3 class="text-xl uppercase tracking-widest mb-6 text-red-500 flex items-center gap-4">
-            <i data-lucide="shield-alert" class="w-8 h-8"></i> ФРОД-МОНИТОРИНГ
-        </h3>
-        <div class="space-y-4">
-            {% for s in suspicious %}
-            <div class="bg-white dark:bg-darkCard p-6 rounded-3xl flex justify-between items-center shadow-sm">
-                <p class="text-sm">Студенты <span class="text-primary">#{{ s.author_id }}</span> и <span class="text-primary">#{{ s.helper_id }}</span> обменялись помощью <span class="text-red-500">{{ s.count }} раз</span>.</p>
-                <a href="/admin/chats" class="px-6 py-2 bg-red-500 text-white rounded-xl text-[9px] uppercase">Проверить чаты</a>
-            </div>
-            {% endfor %}
+    <!-- СТАТИСТИКА -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow">
+            <p class="text-xs text-gray-400">Студентов</p>
+            <h3 class="text-3xl text-primary">{{ users|length }}</h3>
+        </div>
+
+        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow">
+            <p class="text-xs text-gray-400">Заказов</p>
+            <h3 class="text-3xl text-green-500">{{ orders|length }}</h3>
+        </div>
+
+        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow">
+            <p class="text-xs text-gray-400">Фрод</p>
+            <h3 class="text-3xl text-red-500">{{ suspicious|length }}</h3>
         </div>
     </div>
-    {% endif %}
 
     <!-- СПИСОК СТУДЕНТОВ -->
-    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
-        <h3 class="text-xl uppercase tracking-widest mb-10">Списки студентов</h3>
-        <div class="space-y-6">
-            {% for u in users %}
-            {% if not u.is_admin %}
-            <div class="flex flex-col md:flex-row items-center justify-between p-8 bg-gray-50 dark:bg-darkBg rounded-[35px] border dark:border-gray-800 gap-6">
-                <div class="flex-1">
-                    <h4 class="text-lg">{{ u.fullname }} <span class="opacity-30 text-xs">({{ u.student_id }})</span></h4>
-                    <p class="text-[10px] text-gray-400 uppercase">{{ u.points }} PTS • {{ u.course }} • {{ u.faculty }}</p>
-                    {% if u.is_banned %}
-                        <p class="text-[9px] text-red-500 mt-2 uppercase tracking-widest">ЗАБАНЕН: {{ u.ban_reason }}</p>
-                    {% endif %}
-                </div>
+    <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow">
+        <h3 class="text-lg font-bold mb-6">Студенты</h3>
 
-                <div class="shrink-0">
-                    {% if not u.is_banned %}
-                    <!-- ФОРМА БАНА -->
-                    <form action="/admin/ban/{{ u.id }}" method="POST" class="flex gap-2">
-                        <input type="text" name="reason" placeholder="Укажите причину..." required 
-                            class="px-4 py-3 rounded-2xl text-[10px] bg-white dark:bg-darkCard outline-none border border-transparent focus:border-red-500 transition-all w-48 font-black">
-                        <button type="submit" class="px-8 py-3 bg-red-500 text-white rounded-2xl text-[10px] uppercase font-black shadow-lg shadow-red-500/20 active:scale-95 transition-all">
-                            БАН
-                        </button>
-                    </form>
-                    {% else %}
-                    <!-- КНОПКА РАЗБАНА -->
-                    <a href="/admin/unban/{{ u.id }}" class="inline-block px-10 py-3 bg-green-500 text-white rounded-2xl text-[10px] uppercase font-black shadow-lg shadow-green-500/20 active:scale-95 transition-all">
-                        РАЗБАНИТЬ
+        {% for u in users %}
+        {% if not u.is_admin %}
+        <div class="flex justify-between items-center p-4 border-b">
+
+            <div>
+                <p>{{ u.fullname }}</p>
+                <span class="text-xs text-gray-400">
+                    {{ u.points }} pts • {{ u.course }}
+                </span>
+
+                {% if u.is_banned %}
+                <p class="text-xs text-red-500">
+                    БАН: {{ u.ban_reason }}
+                </p>
+                {% endif %}
+            </div>
+
+            <div>
+                {% if not u.is_banned %}
+                <form action="/admin/ban/{{ u.id }}" method="POST" class="flex gap-2">
+                    <input name="reason" placeholder="Причина"
+                        class="px-2 py-1 border rounded text-xs">
+                    <button class="bg-red-500 text-white px-3 py-1 rounded text-xs">
+                        БАН
+                    </button>
+                </form>
+                {% else %}
+                <a href="/admin/unban/{{ u.id }}" class="bg-green-500 text-white px-3 py-1 rounded text-xs">
+                    РАЗБАН
+                </a>
+                {% endif %}
+            </div>
+
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- ТАЛОНЫ -->
+    <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow">
+        <h3 class="text-lg font-bold mb-6">Талоны</h3>
+
+        {% for o in orders %}
+        <div class="flex justify-between items-center p-4 border-b">
+
+            <div>
+                <p>{{ o.item_name }}</p>
+                <span class="text-xs text-gray-400">Код: {{ o.code }}</span><br>
+
+                <span class="
+                    text-xs
+                    {% if o.status == 'approved' %} text-green-500
+                    {% elif o.status == 'rejected' %} text-red-500
+                    {% elif o.status == 'used' %} text-blue-500
+                    {% else %} text-yellow-500
+                    {% endif %}
+                ">
+                    {{ o.status }}
+                </span>
+            </div>
+
+            <div class="flex gap-2">
+
+                {% if o.status == 'pending' %}
+                    <a href="/admin/approve_order/{{ o.id }}"
+                       class="bg-green-500 text-white px-3 py-1 rounded text-xs">✔</a>
+
+                    <a href="/admin/reject_order/{{ o.id }}"
+                       class="bg-red-500 text-white px-3 py-1 rounded text-xs">✖</a>
+                {% endif %}
+
+                {% if o.status == 'approved' %}
+                    <a href="/admin/use_order/{{ o.id }}"
+                       class="bg-blue-500 text-white px-3 py-1 rounded text-xs">
+                        ВЫДАН
                     </a>
-                    {% endif %}
-                </div>
+                {% endif %}
+
             </div>
-            {% endif %}
-            {% endfor %}
+
         </div>
+        {% endfor %}
     </div>
-    
-    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
-        <h3 class="text-xl uppercase tracking-widest mb-10">Талоны (Merch)</h3>
-    
-        <div class="space-y-4">
-            {% for o in orders %}
-            <div class="flex items-center justify-between p-6 border-b">
-    
-                <div>
-                    <p class="text-sm">{{ o.item_name }}</p>
-                    <span class="text-[10px] text-gray-400">Код: {{ o.code }}</span><br>
-                    <span class="text-[10px]">Пользователь ID: {{ o.user_id }}</span>
-                </div>
-    
-                <div class="flex gap-2">
-                    {% if o.status == 'pending' %}
-                        <a href="/admin/approve_order/{{ o.id }}" class="px-4 py-2 bg-green-500 text-white rounded-xl text-xs">✔</a>
-                        <a href="/admin/reject_order/{{ o.id }}" class="px-4 py-2 bg-red-500 text-white rounded-xl text-xs">✖</a>
-                    {% else %}
-                        <span class="text-[10px] uppercase">{{ o.status }}</span>
-                    {% endif %}
-                </div>
-    
+
+    <!-- ВЫДАЧА (ТОЛЬКО APPROVED) -->
+    <div class="bg-white dark:bg-darkCard p-8 rounded-2xl shadow">
+        <h3 class="text-lg font-bold mb-6">Выдача</h3>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {% for o in orders if o.status == 'approved' %}
+            <div class="p-4 border rounded text-center">
+                <p class="text-blue-500 font-bold">{{ o.code }}</p>
+                <p class="text-xs">{{ o.item_name }}</p>
             </div>
             {% endfor %}
         </div>
     </div>
-    <!-- ВЫДАЧА МЕРЧА -->
-    <div class="bg-white dark:bg-darkCard rounded-[50px] p-10 border dark:border-gray-700 font-black italic">
-        <h3 class="text-xl uppercase tracking-widest mb-10">Выдача кодов (Студсовет)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {% for o in orders %}
-            <div class="p-8 bg-blue-50 dark:bg-blue-900/10 rounded-[40px] border-2 border-dashed border-primary/30 text-center relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 opacity-5"><i data-lucide="gift" class="w-20 h-20"></i></div>
-                <p class="text-[14px] text-primary font-black mb-4">{{ o.code }}</p>
-                <h4 class="text-sm mb-2 uppercase">{{ o.item_name }}</h4>
-                <p class="text-[8px] opacity-40">ДАТА: {{ o.date_created.strftime('%d.%m.%Y') }}</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+
 </div>
 {% endblock %}
